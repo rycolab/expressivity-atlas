@@ -26,7 +26,7 @@ export default function Page() {
              \\rnn = \\elmanrnntuple \\\\
               \\text{with hidden state recurrence:} \\\\
               \\begin{align}
-                &\\hiddStatetzero = \\rnnInitstate (t=0) \\\\
+                &\\hiddStatetzero = \\rnnInitstate \\\\\\\\\\\\\ (t=0) \\\\
                 &\\hiddStatet = \\activation\\left(\\recMtx \, \\vhtminus + \\inMtx \, \\inEmbedding(\\symt) + \\biasVec \\right) (t>0)
               \\end{align}
               $$

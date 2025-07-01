@@ -21,15 +21,13 @@ export default function Page() {
           <h4 className="mt-6 mb-2 font-semibold">Definition</h4>
           <div className="flex justify-center my-4">
             <MathJax>{`
-              $$
-              \\text{Elman RNN:} \\\\
-             \\rnn = \\elmanrnntuple \\\\
-              \\text{with hidden state recurrence:} \\\\
-              \\begin{align}
-                &\\hiddStatetzero = \\rnnInitstate (t=0) \\\\
-                &\\hiddStatet = \\activation\\left(\\recMtx \, \\vhtminus + \\inMtx \, \\inEmbedding(\\symt) + \\biasVec \\right) (t>0)
-              \\end{align}
-              $$
+              \textbf{Elman RNN:} \\
+              \quad \rnn = \elmanrnntuple \\
+              \text{with hidden state recurrence:} \\
+              \begin{align}
+                &\hiddStatetzero = \rnnInitstate \quad\quad\quad\quad\quad\quad\quad\quad\quad\quad (t=0) \\
+                &\hiddStatet = \activation\left(\recMtx \, \vhtminus + \inMtx \, \inEmbedding(\symt) + \biasVec \right) \quad (t>0)
+              \end{align}
             `}</MathJax>
           </div>
           <p>
@@ -47,12 +45,10 @@ export default function Page() {
           <h4 className="mt-6 mb-2 font-semibold">Definition</h4>
           <div className="flex justify-center my-4">
             <MathJax>{`
-              $$
-              \\text{Elman LM:} \\\\
-              \\text{Let } \\rnn \\text{ be an Elman RNN and } \\mlp: \\R^{\\hiddDim} \\to \\R^{\\eosnsymbols} \\text{ differentiable.} \\\\
-              \\text{Conditional distributions:} \\\\
-              \\plmRCFun{\\eossym_t}{\\strlt} \\defeq \\projfuncEosalphabetminusFunc{\\mlpFun{\\hiddStatetminus}}_{\\eossym_t}
-              $$
+              \textbf{Elman LM:} \\
+              \text{Let } \rnn \text{ be an Elman RNN and } \mlp: \R^{\hiddDim} \to \R^{\eosnsymbols} \text{ differentiable.} \\
+              \text{Conditional distributions:} \\
+              \plmRCFun{\eossym_t}{\strlt} \defeq \projfuncEosalphabetminusFunc{\mlpFun{\hiddStatetminus}}_{\eossym_t}
             `}</MathJax>
           </div>
           <p>
@@ -60,9 +56,7 @@ export default function Page() {
           </p>
           <div className="flex justify-center my-4">
             <MathJax>{`
-              $$
-              \\softmaxfunc{\\vx}{n} = \\frac{\\exp \\left(\\invtemp \, \\evx_n\\right)}{\\sum_{n' = 1}^{\\setsize} \\exp{\\left(\\invtemp \, \\evx_{n'}\\right)}}
-              $$
+              \softmaxfunc{\vx}{n} = \frac{\exp \left(\invtemp \, \evx_n\right)}{\sum_{n' = 1}^{\setsize} \exp{\left(\invtemp \, \evx_{n'}\right)}}
             `}</MathJax>
           </div>
           <p>
@@ -70,9 +64,7 @@ export default function Page() {
           </p>
           <div className="flex justify-center my-4">
             <MathJax>{`
-              $$
-              \\softmaxfunc{\\vx}{} = \\argmax_{\\vz\\in\\Simplexnminus} \\vz^\\top\\vx+\\entropyFun{\\vz}
-              $$
+              \softmaxfunc{\vx}{} = \argmax_{\vz\in\Simplexnminus} \vz^\top\vx+\entropyFun{\vz}
             `}</MathJax>
           </div>
           <p>
@@ -86,9 +78,7 @@ export default function Page() {
           </p>
           <div className="flex justify-center my-4">
             <MathJax>{`
-              $$
-              \\sparsemaxfunc{\\vx}{} = \\argmin_{\\vz\\in \\Simplexnminus} \\norm{\\vz - \\vx}^2_2
-              $$
+              \sparsemaxfunc{\vx}{} = \argmin_{\vz\in \Simplexnminus} \norm{\vz - \vx}^2_2
             `}</MathJax>
           </div>
           <p>
@@ -101,9 +91,7 @@ export default function Page() {
           <h4 className="mt-6 mb-2 font-semibold">Definition</h4>
           <div className="flex justify-center my-4">
             <MathJax>{`
-              $$
-              \\precisionFun{\\str} = \\max_{d\\in[\\hiddDim]}\\min_{\\substack{p,q\\in\\N,\\\\ \\frac{p}{q}=\\hiddState\\left(\\str\\right)_{d}}} \\lceil\\log_2 p\\rceil + \\lceil\\log_2 q\\rceil
-              $$
+              \precisionFun{\str} = \max_{d\in[\hiddDim]}\min_{\substack{p,q\in\N,\\ \frac{p}{q}=\hiddState\left(\str\right)_{d}}} \lceil\log_2 p\rceil + \lceil\log_2 q\rceil
             `}</MathJax>
           </div>
           <div>

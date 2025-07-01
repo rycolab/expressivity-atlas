@@ -23,11 +23,11 @@ export default function Page() {
             <MathJax>{`
               $$
               \\text{Elman RNN:} \\\\
-             \\rnn = \\elmanrnntuple \\\\
+              \\quad \\rnn = \\elmanrnntuple \\\\
               \\text{with hidden state recurrence:} \\\\
               \\begin{align}
-                &\\hiddStatetzero = \\rnnInitstate (t=0) \\\\
-                &\\hiddStatet = \\activation\\left(\\recMtx \, \\vhtminus + \\inMtx \, \\inEmbedding(\\symt) + \\biasVec \\right) (t>0)
+                &\\hiddStatetzero = \\rnnInitstate \\\\\\\\\\\\\\\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad (t=0) \\\\
+                &\\hiddStatet = \\activation\\left(\\recMtx \, \\vhtminus + \\inMtx \, \\inEmbedding(\\symt) + \\biasVec \\right) \\quad (t>0)
               \\end{align}
               $$
             `}</MathJax>

@@ -1,6 +1,6 @@
 const mathJaxConfig = {
   tex: {
-      packages: { '[+]': ['color', 'ams', 'mathtools', 'amsmath', 'lmodern', 'bm'] },
+      packages: { '[+]': ['color', 'ams', 'mathtools', 'amsmath', 'lmodern'] },
       macros: {
           R: "\\mathbb{R}",
           Rnonneg: "\R_{\\geq 0}",

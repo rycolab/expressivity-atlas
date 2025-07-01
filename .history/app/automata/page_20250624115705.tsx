@@ -18,9 +18,7 @@ export default function Page() {
           <p>
             An <strong>alphabet</strong> <MathJax inline>{"$\\alphabet$"}</MathJax> is a finite, non-empty set of symbols. The <strong>Kleene closure</strong> of an alphabet <MathJax inline>{"$\\alphabet$"}</MathJax> is the set of all finite strings over <MathJax inline>{"$\\alphabet$"}</MathJax> and is denoted by <MathJax inline>{"$\\kleene{\\alphabet}$"}</MathJax>:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\kleene{\\alphabet} \\defeq \\bigcup_{n=0}^\\infty \\alphabet^n$"}</MathJax>
-          </div>
+          <MathJax>{"$\\kleene{\\alphabet} \\defeq \\bigcup_{n=0}^\\infty \\alphabet^n$"}</MathJax>
           <p>
             where <MathJax inline>{"$\\alphabet^n$"}</MathJax> is the set of all strings of length <MathJax inline>{"$n$"}</MathJax> over <MathJax inline>{"$\\alphabet$"}</MathJax>.
             A <strong>language model</strong> (LM) is a probability distribution over <MathJax inline>{"$\\kleene{\\alphabet}$"}</MathJax>, i.e., the strings of symbols from a given alphabet. We denote a language model by <MathJax inline>{"$\\plm$"}</MathJax>.
@@ -29,9 +27,7 @@ export default function Page() {
           <p>
             Most modern neural language models define the probability <MathJax inline>{"$\\plm(\\str)$"}</MathJax> of a string <MathJax inline>{"$\\str \\in \\kleene{\\alphabet}$"}</MathJax> <strong>autoregressively</strong> as a product of conditional probability distributions:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\plm(\\str) \\defeq \\plm(\\eos|\\str) \\prod_{t=1}^{|\\str|} \\plm(\\symt|\\strlt)$"}</MathJax>
-          </div>
+          <MathJax>{"$\\plm(\\str) \\defeq \\plm(\\eos|\\str) \\prod_{t=1}^{|\\str|} \\plm(\\symt|\\strlt)$"}</MathJax>
           <p>
             where <MathJax inline>{"$\\eos$"}</MathJax> is a special end-of-sequence symbol not in <MathJax inline>{"$\\alphabet$"}</MathJax>. A language model expressed this way is called <strong>autoregressive</strong>.
           </p>
@@ -59,12 +55,8 @@ export default function Page() {
           <p>
             <strong>Definition:</strong> A PFSA is a 5-tuple <MathJax inline>{"$\\wfsatuple$"}</MathJax> where <MathJax inline>{"$\\alphabet$"}</MathJax> is an alphabet, <MathJax inline>{"$\\states$"}</MathJax> is a finite set of states, <MathJax inline>{"$\\trans \\subseteq \\states \\times \\alphabet \\times \\Qnonneg \\times \\states$"}</MathJax> is a finite set of weighted transitions, and <MathJax inline>{"$\\initialf, \\finalf: \\states \\to \\Qnonneg$"}</MathJax> assign initial and final weights. For all <MathJax inline>{"$\\stateq \\in \\states$"}</MathJax>:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\sum_{\\stateq \\in \\states} \\initialf(\\stateq) = 1$"}</MathJax>
-          </div>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\sum_{\\edge{\\stateq}{\\sym}{w}{\\stateq'}} w + \\finalf(\\stateq) = 1$"}</MathJax>
-          </div>
+          <MathJax>{"$\\sum_{\\stateq \\in \\states} \\initialf(\\stateq) = 1$"}</MathJax>
+          <MathJax>{"$\\sum_{\\edge{\\stateq}{\\sym}{w}{\\stateq'}} w + \\finalf(\\stateq) = 1$"}</MathJax>
           <h4 className="mt-6 mb-2 font-semibold">Basic Concepts</h4>
           <p>
             A PFSA is <strong>deterministic</strong> if it has a unique initial state and, for every state and symbol, at most one outgoing transition with nonzero weight. Any state with <MathJax inline>{"$\\initialf(\\stateq) > 0$"}</MathJax> is <strong>initial</strong>, and if <MathJax inline>{"$\\finalf(\\stateq) > 0$"}</MathJax> it is <strong>final</strong>.
@@ -72,18 +64,12 @@ export default function Page() {
           <p>
             A <strong>path</strong> <MathJax inline>{"$\\apath$"}</MathJax> of length <MathJax inline>{"$T$"}</MathJax> is a sequence of transitions. The <strong>yield</strong> of a path is the string of symbols along the path. The <strong>prefix weight</strong> is the product of transition and initial weights, and the <strong>weight</strong> of a path also includes the final weight:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\prefixweight(\\apath) = \\prod_{t=0}^T w_t$"}</MathJax>
-          </div>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\weight(\\apath) = \\prod_{t=0}^{T+1} w_t$"}</MathJax>
-          </div>
+          <MathJax>{"$\\prefixweight(\\apath) = \\prod_{t=0}^T w_t$"}</MathJax>
+          <MathJax>{"$\\weight(\\apath) = \\prod_{t=0}^{T+1} w_t$"}</MathJax>
           <p>
             with <MathJax inline>{"$w_0 = \\initialf(\\stateq_1)$"}</MathJax> and <MathJax inline>{"$w_{T+1} = \\finalf(\\stateq_{T+1})$"}</MathJax>. The sum of weights of all paths yielding a string <MathJax inline>{"$\\str$"}</MathJax> is the <strong>stringsum</strong>:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\fsa(\\str) = \\sum_{\\apath \\in \\paths(\\fsa, \\str)} \\weight(\\apath)$"}</MathJax>
-          </div>
+          <MathJax>{"$\\fsa(\\str) = \\sum_{\\apath \\in \\paths(\\fsa, \\str)} \\weight(\\apath)$"}</MathJax>
           <p>
             The stringsum gives the probability of <MathJax inline>{"$\\str$"}</MathJax>. A state is <strong>accessible</strong> if reachable from an initial state, <strong>co-accessible</strong> if it can reach a final state. An automaton where all states are accessible and co-accessible is <strong>trim</strong>.
           </p>
@@ -91,27 +77,28 @@ export default function Page() {
           <p>
             A PFSA <MathJax inline>{"$\\fsa$"}</MathJax> induces a language model <MathJax inline>{"$\\plmA$"}</MathJax> over strings <MathJax inline>{"$\\str \\in \\kleene{\\alphabet}$"}</MathJax>. The weights of all available transitions from a state, together with the final weight, define a probability distribution over the next action (transition or halting). This gives a distribution over <MathJax inline>{"$\\eosalphabet$"}</MathJax>:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"\\[\\plmA(\\eossym_t|q) = \\begin{cases} \\sum\\limits_{\\edge{q}{\\eossym_t}{w}{q'}} w & \\text{if } \\eossym_t \\in \\alphabet \\ \\finalf(q) & \\text{if } \\eossym_t = \\eos \\end{cases}\\]"}</MathJax>
-          </div>
+          <MathJax>{`
+            
+            \[
+            \plmA(\eossym_t|q) =
+            \begin{cases}
+              \sum\limits_{\edge{q}{\eossym_t}{w}{q'}} w & \text{if } \eossym_t \in \alphabet \\
+              \finalf(q) & \text{if } \eossym_t = \eos
+            \end{cases}
+            \]
+          `}</MathJax>
           <p>
             In a PFSA, the probability of <MathJax inline>{"$\\eossym$"}</MathJax> is conditionally independent of <MathJax inline>{"$\\strlt$"}</MathJax> given the state <MathJax inline>{"$q$"}</MathJax>:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\plmA(\\eossym_t|q, \\strlt) = \\plmA(\\eossym_t|q)$"}</MathJax>
-          </div>
+          <MathJax>{"$\\plmA(\\eossym_t|q, \\strlt) = \\plmA(\\eossym_t|q)$"}</MathJax>
           <p>
             The autoregressive language model is then:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\plmA(\\eossym_t|\\strlt) = \\sum_q \\plmA(\\eossym_t|q) \\cdot \\frac{\\plmA(q, \\strlt)}{\\sum_{q'} \\plmA(q', \\strlt)}$"}</MathJax>
-          </div>
+          <MathJax>{`$\\plmA(\\eossym_t|\\strlt) = \\sum_q \\plmA(\\eossym_t|q) \\cdot \\frac{\\plmA(q, \\strlt)}{\\sum_{q'} \\plmA(q', \\strlt)}$`}</MathJax>
           <p>
             where <MathJax inline>{"$\\plmA(q, \\strlt)$"}</MathJax> can be written as:
           </p>
-          <div className="flex justify-center my-4">
-            <MathJax>{"$\\plmA(q, \\strlt) = (\\vec{\\lambda}^\\top \\prod_{s=1}^t \\mT^{(y_s)})_q$"}</MathJax>
-          </div>
+          <MathJax>{"$\\plmA(q, \\strlt) = (\\vec{\\lambda}^\\top \\prod_{s=1}^t \\mT^{(y_s)})_q$"}</MathJax>
           <p>
             where <MathJax inline>{"$\\vec{\\lambda}$"}</MathJax> and <MathJax inline>{"$\\mT^{(y_s)}$"}</MathJax> are the vectorized initial function and symbol-specific transition matrices of the PFSA.
           </p>
