@@ -324,7 +324,10 @@ const mathJaxConfig = {
           mBeta: '{\\boldsymbol{\\beta}}',
           mPhi: '{\\boldsymbol{\\Phi}}',
           mLambda: '{\\boldsymbol{\\Lambda}}',
-          mSigma: '{\\boldsymbol{\\Sigma}}'
+          mSigma: '{\\boldsymbol{\\Sigma}}',
+
+          false: '{\\bot}',
+          true: '{\\top}',
       },
       inlineMath: [['$', '$'], ['\\(', '\\)']],
       displayMath: [['$$', '$$'], ['\\[', '\\]']],

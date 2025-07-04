@@ -2,12 +2,30 @@
 
 import { useRef, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { graphData as fullGraphData } from '@/app/data/graphData';
+import { graphData as rawGraphData } from '@/app/data/graphData';
 
 const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
+type Node = {
+  id: string;
+  group: string;
+  // add other node properties here if needed
+};
+
+type Link = {
+  source: string | { id: string };
+  target: string | { id: string };
+  label?: string;
+  // add other link properties here if needed
+};
+
+const fullGraphData: {
+  nodes: Node[];
+  links: Link[];
+} = rawGraphData;
+
 export default function ClassGraph() {
-  const fgRef = useRef();
+  const fgRef = useRef<any>(null);
   const [selectedGroups, setSelectedGroups] = useState(() => {
     const allGroups = new Set(fullGraphData.nodes.map(n => n.group));
     return Array.from(allGroups);
@@ -18,7 +36,7 @@ export default function ClassGraph() {
   const nodeIds = new Set(filteredNodes.map(n => n.id));
 
   // Normalize source/target and filter links
-  const filteredLinks = fullGraphData.links.flatMap(link => {
+  const filteredLinks = fullGraphData.links.flatMap((link: Link) => {
     const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
     const targetId = typeof link.target === 'string' ? link.target : link.target.id;
 
@@ -87,30 +105,45 @@ export default function ClassGraph() {
         />
 
         {/* Legend */}
-        <div style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          background: 'rgba(255, 255, 255, 0.9)',
-          padding: '10px',
-          borderRadius: '8px',
-          fontSize: '0.85rem',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
-        }}>
-          <div><strong>Legend</strong></div>
-          <div style={{ marginTop: '6px' }}>
-            <div>→ <span style={{ marginLeft: 4 }}>is a subset of</span></div>
-            <div>⇄ <span style={{ marginLeft: 4 }}>is equivalent to</span></div>
+        <div
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            background: 'rgba(255, 255, 255, 0.9)',
+            padding: '10px',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+          }}
+        >
+          <div>
+            <strong>Legend</strong>
           </div>
-          <div style={{ marginTop: '8px' }}><strong>Node Groups:</strong></div>
+          <div style={{ marginTop: '6px' }}>
+            <div>
+              → <span style={{ marginLeft: 4 }}>is a subset of</span>
+            </div>
+            <div>
+              ⇄ <span style={{ marginLeft: 4 }}>is equivalent to</span>
+            </div>
+          </div>
+          <div style={{ marginTop: '8px' }}>
+            <strong>Node Groups:</strong>
+          </div>
           {allGroups.map(group => (
-            <div key={group} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-              <span style={{
-                width: 12,
-                height: 12,
-                backgroundColor: getColorForGroup(group),
-                borderRadius: '50%'
-              }} />
+            <div
+              key={group}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}
+            >
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  backgroundColor: getColorForGroup(group),
+                  borderRadius: '50%',
+                }}
+              />
               <span>{group}</span>
             </div>
           ))}

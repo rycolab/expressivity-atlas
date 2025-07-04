@@ -13,7 +13,7 @@ interface ContentLayoutProps {
 
 export default function ContentLayout({ title, intro, sections }: ContentLayoutProps) {
   return (
-    <main className="flex flex-col min-h-screen px-6 py-12 max-w-5xl mx-auto">
+    <main className="flex flex-col min-h-screen px-6 py-12 max-w-none mx-auto">
       {/* Page Title */}
       <header className="mb-8 text-center">
         <h1 className="text-4xl font-bold text-gray-900 tracking-tight">{title}</h1>
@@ -30,8 +30,15 @@ export default function ContentLayout({ title, intro, sections }: ContentLayoutP
       <div className="space-y-12">
         {sections.map((section, idx) => (
           <section key={idx}>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-3">{section.title}</h2>
-            <div className="text-gray-700 leading-relaxed">{section.content}</div>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-3 text-center">{section.title}</h2>
+            {section.title.toLowerCase().includes('example') ? (
+              <div className="flex flex-row items-start gap-12 w-full">
+                {/* The content is expected to be diagram + sidebar siblings */}
+                {section.content}
+              </div>
+            ) : (
+              <div className="text-gray-700 leading-relaxed">{section.content}</div>
+            )}
           </section>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import ContentLayout from '@/app/ui/ContentLayout';
+import ContentLayout from '@/app/ui/content-layout';
 import Link from 'next/link';
 
 export default function Page() {

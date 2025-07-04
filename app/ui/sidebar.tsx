@@ -10,8 +10,6 @@ import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import React from "react";
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Home', href: '/', icon: HomeIcon },
   {
@@ -23,74 +21,82 @@ const links = [
       { name: 'State-Space Models', href: '/networks/ssm' },
     ],
   },
-  {
-    name: 'Formal Languages',
-    href: '/languages',
-  },
-  {
-    name: 'Formal Logics',
-    href: '/logics',
-  },
-  {
-    name: 'Finite Automata',
-    href: '/automata',
-  },
-  {
-    name: 'Finite Monoids',
-    href: '/monoids',
-  },
-  {
-    name: 'Circuit Complexity',
-    href: '/circuits',
-  },
-  {
-    name: 'Programming Languages',
-    href: '/programs',
-  },
+  { name: 'Formal Languages', href: '/languages' },
+  { name: 'Formal Logics', href: '/logics' },
+  { name: 'Finite Automata', href: '/automata' },
+  { name: 'Finite Monoids', href: '/monoids' },
+  { name: 'Circuit Complexity', href: '/circuits' },
+  { name: 'Programming Languages', href: '/programs' },
 ];
 
 export default function SideBar() {
   const pathname = usePathname();
   return (
-    <aside className="w-64 bg-gray-50 h-screen flex flex-col">
-      <ul>
-      {links.map((link) => (
-        <li key={link.name}>
-          <Link
-            href={link.href}
-            className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
-              {
-                "bg-sky-100 text-blue-600": pathname === link.href,
-              }
-            )}
-          >
-            <FolderIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
-          </Link>
-          {pathname.startsWith(link.href) && link.subpages && (
-            <ul className="pl-2">
-              {link.subpages.map((subpage) => (
-                <li key={subpage.name}>
-                  <Link
-                    href={subpage.href}
-                    className={clsx(
-                      "flex h-[40px] items-center justify-start gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 pl-20 md:flex-none md:justify-start md:p-2 md:px-3",
-                      {
-                        "bg-sky-100 text-blue-600": pathname === subpage.href,
-                      }
-                    )}
-                  >
-                    <DocumentIcon className="w-5" />
-                    <p className="hidden md:block">{subpage.name}</p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      ))}
+    <aside className="w-64 bg-white h-screen flex flex-col shadow-xl border-r border-gray-100">
+      <div className="p-6 font-extrabold text-xl text-gray-800 tracking-tight mb-4 select-none">
+        Expressivity Atlas
+      </div>
+      <ul className="flex-1 px-2 space-y-2">
+        {links.map((link) => {
+          const Icon = link.icon ?? FolderIcon;
+          const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+          return (
+            <li key={link.name}>
+              <Link
+                href={link.href}
+                className={clsx(
+                  "flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium transition-colors duration-200",
+                  isActive
+                    ? "bg-blue-50 text-blue-700 shadow"
+                    : "hover:bg-blue-50 text-gray-700"
+                )}
+              >
+                <span className={clsx(
+                  "flex items-center justify-center rounded-lg p-1 transition-all",
+                  isActive
+                    ? "bg-blue-100"
+                    : "bg-gray-100"
+                )}>
+                  <Icon className="w-6 h-6" />
+                </span>
+                <span>{link.name}</span>
+              </Link>
+              {/* Render subpages if present and parent link is active */}
+              {isActive && link.subpages && (
+                <ul className="ml-7 mt-1 border-l-2 border-blue-100 pl-3 space-y-1">
+                  {link.subpages.map((subpage) => (
+                    <li key={subpage.name}>
+                      <Link
+                        href={subpage.href}
+                        className={clsx(
+                          "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                          pathname === subpage.href
+                            ? "bg-blue-100 text-blue-700 font-semibold shadow"
+                            : "hover:bg-blue-50 text-gray-600"
+                        )}
+                      >
+                        <DocumentIcon className="w-4 h-4" />
+                        <span>{subpage.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
       </ul>
+      <div className="p-4 border-t border-gray-100 flex items-center gap-3 mt-auto">
+        <img
+          src="/lab.png" // <- use your icon file here
+          alt="Rycolab"
+          className="w-10 h-10 rounded-full shadow"
+        />
+        <div>
+          <div className="font-semibold text-gray-800">Rycolab</div>
+        </div>
+        {/* Optional: Add settings/logout button here */}
+      </div>
     </aside>
   );
 }
