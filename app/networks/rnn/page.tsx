@@ -1,7 +1,7 @@
 "use client";
 
 import { MathJax } from "better-react-mathjax";
-import ContentLayout from "@/app/ui/ContentLayout";
+import ContentLayout from "@/app/ui/content-layout";
 
 export default function Page() {
   const intro = (
