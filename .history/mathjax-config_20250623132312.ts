@@ -1,6 +1,6 @@
 const mathJaxConfig = {
   tex: {
-      packages: { '[+]': ['color', 'ams', 'mathtools', 'amsmath', 'lmodern', 'bm'] },
+      packages: { '[+]': ['color', 'ams', 'mathtools', 'amsmath', 'lmodern'] },
       macros: {
           R: "\\mathbb{R}",
           Rnonneg: "\R_{\\geq 0}",
@@ -324,10 +324,7 @@ const mathJaxConfig = {
           mBeta: '{\\boldsymbol{\\beta}}',
           mPhi: '{\\boldsymbol{\\Phi}}',
           mLambda: '{\\boldsymbol{\\Lambda}}',
-          mSigma: '{\\boldsymbol{\\Sigma}}',
-
-          false: '{\\bot}',
-          true: '{\\top}',
+          mSigma: '{\\boldsymbol{\\Sigma}}'
       },
       inlineMath: [['$', '$'], ['\\(', '\\)']],
       displayMath: [['$$', '$$'], ['\\[', '\\]']],
