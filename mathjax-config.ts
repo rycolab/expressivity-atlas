@@ -1,6 +1,6 @@
 const mathJaxConfig = {
   tex: {
-      packages: { '[+]': ['color', 'ams', 'mathtools', 'amsmath', 'lmodern', 'bm'] },
+      packages: { '[+]': ['color', 'ams', 'mathtools', 'amsmath', 'lmodern', 'bm', 'base', 'html'] },
       macros: {
           R: "\\mathbb{R}",
           Rnonneg: "\R_{\\geq 0}",
@@ -328,6 +328,15 @@ const mathJaxConfig = {
 
           false: '{\\bot}',
           true: '{\\top}',
+          
+          past: '{\\mathrel{\\textbf{P}}}',
+          future: '{\\mathrel{\\textbf{F}}}',
+
+          since: '{\\mathrel{\\textbf{S}}}',
+          until: '{\\mathrel{\\textbf{U}}}',
+
+          pfo: '{\\textbf{PFO}^2[<]}',
+          ptl: '{\\textbf{LTL}[\\past]}'
       },
       inlineMath: [['$', '$'], ['\\(', '\\)']],
       displayMath: [['$$', '$$'], ['\\[', '\\]']],

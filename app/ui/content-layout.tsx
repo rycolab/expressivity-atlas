@@ -31,14 +31,9 @@ export default function ContentLayout({ title, intro, sections }: ContentLayoutP
         {sections.map((section, idx) => (
           <section key={idx}>
             <h2 className="text-2xl font-semibold text-gray-800 mb-3 text-center">{section.title}</h2>
-            {section.title.toLowerCase().includes('example') ? (
-              <div className="flex flex-row items-start gap-12 w-full">
-                {/* The content is expected to be diagram + sidebar siblings */}
-                {section.content}
-              </div>
-            ) : (
-              <div className="text-gray-700 leading-relaxed">{section.content}</div>
-            )}
+            <div className="text-gray-700 leading-relaxed">
+              {section.content}
+            </div>
           </section>
         ))}
       </div>
