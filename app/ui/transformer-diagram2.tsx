@@ -9,15 +9,22 @@ type NodeKey =
   | "key"
   | "value"
   | "dot"
-  | "argmax"
-  | "leftmost"
+  | "softmax"
   | "wsum"
-  | "proj"
   | "addnorm1"
-  | "ff_linear1"
-  | "ff_gelu"
-  | "ff_linear2"
+  | "ff"
   | "addnorm2"
+
+  | "query2"
+  | "key2"
+  | "value2"
+  | "dot2"
+  | "softmax2"
+  | "wsum2"
+  | "addnorm3"
+  | "ff2"
+  | "addnorm4"
+
   | "linear"
 
 const DAG: Record<NodeKey, { parents: NodeKey[]; children: NodeKey[] }> = {
@@ -25,17 +32,22 @@ const DAG: Record<NodeKey, { parents: NodeKey[]; children: NodeKey[] }> = {
   query: { parents: ["embedding"], children: ["dot"] },
   key: { parents: ["embedding"], children: ["dot"] },
   value: { parents: ["embedding"], children: ["wsum"] },
-  dot: { parents: ["query", "key"], children: ["argmax"] },
-  argmax: { parents: ["dot"], children: ["leftmost"] },
-  leftmost: { parents: ["argmax"], children: ["wsum"] },
-  wsum: { parents: ["leftmost", "value"], children: ["proj"] },
-  proj: { parents: ["wsum"], children: ["addnorm1"] },
-  addnorm1: { parents: ["proj"], children: ["ff_linear1"] },
-  ff_linear1: { parents: ["addnorm1"], children: ["ff_gelu"] },
-  ff_gelu: { parents: ["ff_linear1"], children: ["ff_linear2"] },
-  ff_linear2: { parents: ["ff_gelu"], children: ["addnorm2"] },
-  addnorm2: { parents: ["ff_linear2"], children: ["linear"] },
-  linear: { parents: ["addnorm2"], children: [] },
+  dot: { parents: ["query", "key"], children: ["softmax"] },
+  softmax: { parents: ["dot"], children: ["wsum"] },
+  wsum: { parents: ["softmax", "value"], children: ["addnorm1"] },
+  addnorm1: { parents: ["wsum"], children: ["ff"] },
+  ff: { parents: ["addnorm1"], children: ["addnorm2"]},
+  addnorm2: { parents: ["ff"], children: ["query2", "key2", "value2"] },
+  query2: { parents: ["addnorm2"], children: ["dot2"] },
+  key2: { parents: ["addnorm2"], children: ["dot2"] },
+  value2: { parents: ["addnorm2"], children: ["wsum2"] },
+  dot2: { parents: ["query2", "key2"], children: ["softmax2"] },
+  softmax2: { parents: ["dot2"], children: ["wsum2"] },
+  wsum2: { parents: ["softmax2", "value2"], children: ["addnorm3"] },
+  addnorm3: { parents: ["wsum2"], children: ["ff2"] },
+  ff2: { parents: ["addnorm3"], children: ["addnorm4"]},
+  addnorm4: { parents: ["ff2"], children: ["linear"] },
+  linear: { parents: ["addnorm4"], children: [] },
 };
 
 const nodeDisplay: Record<NodeKey, { label: string; color: string }> = {
@@ -44,242 +56,21 @@ const nodeDisplay: Record<NodeKey, { label: string; color: string }> = {
   key: { label: "Key projection", color: "bg-amber-600" },
   value: { label: "Value projection", color: "bg-amber-600" },
   dot: { label: "Scaled Dot-Product", color: "bg-amber-600" },
-  argmax: { label: "Argmax", color: "bg-amber-600" },
-  leftmost: { label: "Leftmost", color: "bg-amber-600" },
+  softmax: { label: "Softmax", color: "bg-amber-600" },
   wsum: { label: "Weighted sum", color: "bg-amber-600" },
-  proj: { label: "Projection", color: "bg-amber-600" },
-  addnorm1: { label: "Add & Norm", color: "bg-slate-600" },
-  ff_linear1: { label: "Linear", color: "bg-lime-600" },
-  ff_gelu: { label: "GELU", color: "bg-lime-600" },
-  ff_linear2: { label: "Linear", color: "bg-lime-600" },
-  addnorm2: { label: "Add & Norm", color: "bg-slate-600" },
+  addnorm1: { label: "Add", color: "bg-slate-600" },
+  ff: { label: "Feed Forward", color: "bg-lime-600" },
+  addnorm2: { label: "Add", color: "bg-slate-600" },
+  query2: { label: "Query projection", color: "bg-amber-600" },
+  key2: { label: "Key projection", color: "bg-amber-600" },
+  value2: { label: "Value projection", color: "bg-amber-600" },
+  dot2: { label: "Scaled Dot-Product", color: "bg-amber-600" },
+  softmax2: { label: "Softmax", color: "bg-amber-600" },
+  wsum2: { label: "Weighted sum", color: "bg-amber-600" },
+  addnorm3: { label: "Add", color: "bg-slate-600" },
+  ff2: { label: "Feed Forward", color: "bg-lime-600" },
+  addnorm4: { label: "Add", color: "bg-slate-600" },
   linear: { label: "Linear", color: "bg-rose-600" },
-};
-
-const nodeLogics: Record<NodeKey, React.ReactNode> = {
-  embedding: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        E_{-2.9}(x) &= \\pi_a(x) \\\\
-        E_{0.05}(x) &= \\pi_b(x) \\\\
-        E_{0}(x) &= \\pi_c(x)
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  query: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        Q_{-1.3}(x) &= E_{-2.9}(x) \\\\
-        &= \\pi_a(x) \\\\
-        Q_{-0.2}(x) &= E_{0.05}(x) \\lor E_{0}(x) \\\\
-        &= \\pi_b(x) \\lor \\pi_c(x)
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  key: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        K_{-1.5}(x) &= E_{-2.9}(x) \\\\
-        &= \\pi_a(x) \\\\
-        K_{-0.4}(x) &= E_{0.05}(x) \\lor E_{0}(x) \\\\
-        &= \\pi_b(x) \\lor \\pi_c(x)
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  value: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        V_{-1.5}(x) &= E_{-2.9}(x) \\\\
-        &= \\pi_a(x) \\\\
-        V_{-0.6}(x) &= E_{0}(x) \\\\
-        &= \\pi_c(x) \\\\
-        V_{-0.4}(x) &= E_{0.05}(x) \\\\
-        &= \\pi_b(x)
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  dot: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        D_{0}(x,y) &= Q_{-0.2}(x) \\land K_{-0.4}(y) \\\\
-        &= (\\pi_b(x) \\lor \\pi_c(x)) \\land (\\pi_b(y) \\lor \\pi_c(y)) \\\\
-        D_{0.3}(x,y) &= Q_{-0.2}(x) \\land K_{-1.5}(y) \\\\
-        &= (\\pi_b(x) \\lor \\pi_c(x)) \\land \\pi_a(y) \\\\
-        D_{0.5}(x,y) &= Q_{-1.3}(x) \\land K_{-0.4}(y) \\\\
-        &= \\pi_a(x) \\land (\\pi_b(y) \\lor \\pi_c(y)) \\\\
-        D_{1.9}(x,y) &= Q_{-1.3}(x) \\land K_{-1.5}(y) \\\\
-        &= \\pi_a(x) \\land \\pi_a(y)
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  argmax: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        \\text{argmax}_{1.9}(x, y) &= D_{1.9}(x,y)\\\\
-        &= \\pi_a(x) \\land \\pi_a(y) \\\\
-        \\text{argmax}_{0.5}(x, y) &= D_{0.5}(x,y) \\land \\lnot \\exists z\\leq x:D_{1.9}(x,z) \\\\
-        & = \\false \\\\
-        \\text{argmax}_{0.3}(x, y) &= D_{0.3}(x,y) \\land \\lnot \\exists z\\leq x: (D_{1.9}(x,z) \\lor D_{0.5}(x,z)) \\\\
-        &= (\\pi_{b}(x) \\lor \\pi_{c}(x)) \\land \\pi_{a}(y) \\\\
-        \\text{argmax}_{0}(x, y) &= D_{0}(x,y) \\land \\lnot \\exists z\\leq x:(D_{1.9}(x,z)\\lor D_{0.5}(x,z)\\lor D_{0.3}(x,z)) \\\\
-        &= (\\pi_b(y) \\lor \\pi_c(y)) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        \\text{argmax}(x, y) &= y\\leq x \\land (\\text{argmax}_{1.9}(x, y) \\lor \\text{argmax}_{0.5}(x, y) \\\\
-        &\\quad\\quad\\quad\\quad\\quad \\lor \\text{argmax}_{0.3}(x, y) \\lor \\text{argmax}_{0}(x, y)) \\\\
-        &= y\\leq x \\land (\\pi_a(y) \\lor \\lnot \\exists y \\leq x:\\pi_a(y))
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  leftmost: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        \\text{leftmost}(x, y) &= \\text{argmax}(x, y) \\land \\lnot \\exists z<y: \\text{argmax}(x, z) \\\\
-        &= y\\leq x \\land (\\pi_a(y)\\land (\\lnot \\exists z <y: \\pi_a(z)) \\\\
-        &\\quad \\quad \\quad \\quad \\lor (\\lnot \\exists y\\leq x: \\pi_a(y))\\land \\lnot \\exists z<y)
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  wsum: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        S_{-1.5}(x)&=\\exists y\\leq x: (\\text{leftmost}(x, y) \\land V_{-1.5}(y)) \\\\
-        &= \\exists y\\leq x: (\\text{leftmost}(x, y) \\land \\pi_a(y)) \\\\
-        &= \\exists y\\leq x: \\pi_a(y) \\\\
-        S_{-0.6}(x)&=\\exists y\\leq x: (\\text{leftmost}(x, y) \\land V_{-0.6}(y)) \\\\
-        &= \\exists y\\leq x: (\\text{leftmost}(x, y) \\land \\pi_c(y)) \\\\
-        &= \\exists y\\leq x: (\\pi_c(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        S_{-0.4}(x)&=\\exists y\\leq x: (\\text{leftmost}(x, y) \\land V_{-0.4}(y)) \\\\
-        &= \\exists y\\leq x: (\\text{leftmost}(x, y) \\land \\pi_b(y)) \\\\
-        &= \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  proj: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        A_{-0.5}(x)&=S_{-1.5}(x) \\\\
-        &= \\exists y\\leq x: \\pi_a(y) \\\\
-        A_{-0.1}(x)&=S_{-0.6}(x) \\\\
-        &= \\exists y\\leq x: (\\pi_c(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        A_{0.02}(x)&=S_{-0.4}(x) \\\\
-        &= \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  addnorm1: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        N_{-3.5}(x) &= E_{-2.9}(x)\\land A_{-0.5}(x) \\\\
-        &= \\pi_a(x) \\land \\exists y\\leq x: \\pi_a(y) \\\\
-        &= \\pi_a(x) \\\\
-        N_{-0.5}(x) &= E_{0}(x) \\land A_{-0.5}(x) \\\\
-        &= \\pi_c(x) \\land \\exists y\\leq x: \\pi_a(y) \\\\
-        N_{-0.4}(x) &= E_{0.05}(x) \\land A_{-0.5}(x) \\\\
-        &= \\pi_b(x) \\land \\exists y\\leq x: \\pi_a(y) \\\\
-        N_{-0.1}(x) &= E_{0}(x) \\land A_{-0.1}(x) \\\\
-        &= \\pi_c(x) \\land \\exists y\\leq x: (\\pi_c(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        N_{-0.06}(x) &= E_{0.05}(x) \\land A_{-0.1}(x) \\\\
-        &= \\pi_b(x) \\land \\exists y\\leq x: (\\pi_c(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        N_{0.02}(x) &= E_{0}(x) \\land A_{0.02}(x) \\\\
-        &= \\pi_c(x) \\land \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        N_{0.06}(x) &= E_{0.05}(x) \\land A_{0.02}(x) \\\\
-        &= \\pi_b(x) \\land \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  ff_linear1: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        L_{[-0.8, 5.6, -2.4, 1.4]}(x) &= N_{-3.5} \\\\
-        &= \\pi_a(x) \\\\
-        L_{[0, 0, -0.8, 0]}(x) &= N_{-0.1}(x) \\lor N_{-0.06}(x) \\lor N_{0.02} \\lor N_{0.06} \\\\
-        &= \\lnot \\exists y\\leq x: \\pi_a(y) \\\\
-        L_{[ 0, 1.4, -0.8, 0]}(x) &= N_{-0.5}(x) \\lor N_{-0.4}(x) \\\\
-        &= (\\pi_b(x) \\lor \\pi_c(x)) \\land \\exists y\\leq x: \\pi_a(y) \\\\
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  ff_gelu: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        G_{[-0.2, 5.6, -0.03, 0]}(x) &= L_{[-0.8, 5.6, -2.4, 1.4]}(x)\\\\
-        &= \\exists y\\leq x: ((\\pi_b(y) \\lor \\pi_c(y)) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        &= \\pi_a(x) \\\\
-        G_{[0, 0, -0.2, 0]}(x) &= L_{[0, 0, -0.8, 0]}(x) \\lor L_{[ 0, 1.4, -0.8, 0]}(x) \\\\
-        &= \\lnot \\exists y\\leq x: \\pi_a(y) \\lor (\\pi_b(x) \\lor \\pi_c(x)) \\\\
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  ff_linear2: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        F_{-3.1}(x) &= G_{[-0.2, 5.6, -0.03, 0]}(x) \\\\
-        &= \\pi_a(x) \\\\
-        F_{0}(x) &= G_{[0, 0, -0.2, 0]}(x) \\\\
-        &= (\\pi_b(x) \\lor \\pi_c(x)) \\land \\exists y\\leq x: \\pi_a(y) \\\\
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  addnorm2: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        R_{-6.6}(x) &= N_{-3.5}(x)\\land F_{-3.1}(x)\\\\
-        &= \\pi_a(x) \\\\
-        R_{0}(x) &= N_{-0.1}(x) \\land F_{0}(x) \\lor N_{-0.06}(x)\\land F_{0}(x) \\\\
-        &\\quad \\lor N_{-0.4}(x) \\land F_{0}(x) \\lor N_{-0.5}(x) \\land F_{0}(x) \\\\
-        & = \\big( \\lnot \\exists y\\leq x: \\pi_{a}(y)\\big) \\land  \\exists y \\leq x: \\Big( \\pi_{c}(y) \\land  \\lnot \\exists z2 < y \\Big) \\\\
-        & \\quad \\lor (\\pi_{b}(x) \\lor \\pi_{c}(x)) \\land \\exists y\\leq x: \\pi_a(y) \\\\
-        R_{0.03}(x) &= N_{0.02}(x) \\land F_{0}(x) \\\\
-        &= \\pi_c(x) \\land \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        R_{0.06}(x) &= N_{0.06}(x) \\land F_{0}(x) \\\\
-        &= \\pi_b(x) \\land \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y)
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
-  linear: (
-    <MathJax>
-      {`$$
-        \\begin{align}
-        O_{-0.2}(x) &= R_{0.06}(x) \\\\
-        &= \\pi_b(x) \\land \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        O_{-0.1}(x) &= R_{0.03}(x) \\\\
-        &= \\pi_c(x) \\land \\exists y\\leq x: (\\pi_b(y) \\land \\lnot \\exists z < y) \\land \\lnot \\exists y \\leq x:\\pi_a(y) \\\\
-        O_{-0.09}(x) &= R_{0}(x) \\\\\
-        & = \\big( \\lnot \\exists y\\leq x: \\pi_{a}(y)\\big) \\land  \\exists y \\leq x: \\Big( \\pi_{c}(y) \\land  \\lnot \\exists z2 < y \\Big) \\\\
-        & \\quad \\lor (\\pi_{b}(x) \\lor \\pi_{c}(x)) \\land \\exists y\\leq x: \\pi_a(y) \\\\
-        O_{10.8}(x) &= R_{-6.6}(x) \\\\
-        &= \\pi_a(x) \\\\
-        \\end{align}
-      $$`}
-    </MathJax>
-  ),
 };
 
 
@@ -287,37 +78,51 @@ const nodeLogics: Record<NodeKey, React.ReactNode> = {
 const displayOrder: NodeKey[] = [
   "embedding",
   "query", "key", "value",
-  "dot", "argmax", "leftmost", "wsum", "proj",
+  "dot", "softmax", "wsum",
   "addnorm1",
-  "ff_linear1", "ff_gelu", "ff_linear2",
+  "ff",
   "addnorm2",
+  "query2", "key2", "value2",
+  "dot2", "softmax2", "wsum2",
+  "addnorm3",
+  "ff2",
+  "addnorm4",
   "linear",
 ];
 
-// *** Responsive TokenBox: font size and box size decrease on small screens
-const TokenBox = ({ token }: { token: string }) => (
-  <div
-    className={`
-      border rounded-xl shadow-sm bg-white text-center
-      flex items-center justify-center
-      transition-all
-      w-7 h-7 text-[8px]
-      xs:w-8 xs:h-8 xs:text-[9px]
-      sm:w-10 sm:h-10 sm:text-[10px]
-      md:w-12 md:h-12 md:text-[11px]
-      lg:w-14 lg:h-14 lg:text-[12px]
-      max-w-[2.75rem] max-h-[2.75rem]
-      break-all
-    `}
-    style={{
-      minWidth: '1.75rem',
-      minHeight: '1.75rem',
-    }}
-  >
-    {token}
-  </div>
-);
+type TokenBoxProps = {
+  token: string | { value: string; highlight?: boolean };
+};
 
+const TokenBox = ({ token }: TokenBoxProps) => {
+  const isObj = typeof token === "object";
+  const value = isObj ? token.value : token;
+  const highlight = isObj && token.highlight;
+
+  return (
+    <div
+      className={`
+        border rounded-xl shadow-sm text-center
+        flex items-center justify-center
+        transition-all
+        w-6 h-6 text-[7px]
+        xs:w-7 xs:h-7 xs:text-[8px]
+        sm:w-8 sm:h-8 sm:text-[9px]
+        md:w-9 md:h-9 md:text-[10px]
+        lg:w-10 lg:h-10 lg:text-[11px]
+        max-w-[2rem] max-h-[2rem]
+        break-all
+        ${highlight ? "bg-yellow-200 border-yellow-400 font-bold" : "bg-white"}
+      `}
+      style={{
+        minWidth: "1.5rem",
+        minHeight: "1.5rem",
+      }}
+    >
+      {value}
+    </div>
+  );
+};
 
 const TokenMatrix = ({ tokens }: { tokens: string[][] }) => (
   <div className="flex flex-col gap-[2px] my-2">
@@ -346,7 +151,8 @@ const LayerBox = ({
   children?: React.ReactNode;
 }) => (
   <div
-    className={`relative rounded-2xl shadow-md p-3 sm:p-4 text-center w-full max-w-4xl mx-auto ${color} bg-opacity-90`}
+    className={`relative rounded-2xl shadow-md px-3 sm:px-4 py-1 sm:py-1.5 w-full max-w-4xl mx-auto ${color} bg-opacity-90
+                flex flex-col items-center text-center`}
   >
     {onPrev && (
       <button
@@ -366,8 +172,15 @@ const LayerBox = ({
         ▼
       </button>
     )}
-    <div className="text-lg font-semibold text-white mb-2">{label}</div>
-    {children && <div>{children}</div>}
+
+    {/* Remove margin below */}
+    <div className="text-sm sm:text-base font-semibold text-white leading-tight">
+      {label}
+    </div>
+
+    {children && (
+      <div className="mt-0.5">{children}</div>
+    )}
   </div>
 );
 
@@ -405,15 +218,24 @@ const SubLayerBox = ({
         ▼
       </button>
     )}
-    <span className="text-xs font-semibold text-white mb-1">{label}</span>
-    {children}
+
+    <span className="text-xs font-semibold text-white leading-tight">
+      {label}
+    </span>
+
+    {children && (
+      <div className="mt-0.5">
+        {children}
+      </div>
+    )}
   </div>
 );
 
-const vocabulary: Record<string, number> = {
-  b: 0.05,
-  a: -2.9,
-  c: 0,
+
+const vocabulary: Record<string, number[]> = {
+  a: [1,0,0,0,0,0,0],
+  b: [0,1,0,0,0,0,0],
+  c: [0,0,1,0,0,0,0],
 };
 const makeMatrix = (rows: number, cols: number, prefix: string) =>
   Array.from({ length: rows }, (_, i) =>
@@ -429,15 +251,20 @@ export default function TransformerDiagram2() {
     key: false,
     value: false,
     dot: false,
-    argmax: false,
-    leftmost: false,
+    softmax: false,
     wsum: false,
-    proj: false,
     addnorm1: false,
-    ff_linear1: false,
-    ff_gelu: false,
-    ff_linear2: false,
+    ff: false,
     addnorm2: false,
+    query2: false,
+    key2: false,
+    value2: false,
+    dot2: false,
+    softmax2: false,
+    wsum2: false,
+    addnorm3: false,
+    ff2: false,
+    addnorm4: false,
     linear: false
   });
 
@@ -490,93 +317,392 @@ export default function TransformerDiagram2() {
     setNodeActive(newState);
   }, [nodeActive]);
 
+  const [alternateMode, setAlternateMode] = useState(false);
+  const [showFullDiagram, setShowFullDiagram] = useState(false);
+
   // (outputs definition unchanged)
   const outputs = useMemo(() => ({
     embedding: nodeActive.embedding
-      ? [[...inputTokens.map((t) => vocabulary[t].toString())]]
-      : [Array(5).fill("")],
+      ? [
+        ["0", "1", "0", "1", "0"],
+        ["1", "0", "0", "0", "0"],
+        ["0", "0", "1", "0", "1"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
     query: nodeActive.query
-      ? [["-0.2", "-1.3", "-0.2", "-1.3", "-0.2"]]
-      : [Array(5).fill("")],
+      ? [
+        ["-800", "-800", "-800", "-800", "-800"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
     key: nodeActive.key
-      ? [["-0.4", "-1.5", "-0.4", "-1.5", "-0.4"]]
-      : [Array(5).fill("")],
+      ? [
+        ["-1", "0", "-1", "0", "-1"],
+        ["0", "-1", "-1", "-1", "-1"],
+        ["-1", "-1", "0", "-1", "0"],
+        ["-1", "-1", "-1", "-1", "-1"],
+        ["-1", "-1", "-1", "-1", "-1"],
+        ["-1", "-1", "-1", "-1", "-1"],
+        ["-1", "-1", "-1", "-1", "-1"]
+      ]
+      : makeMatrix(7, 5, ""),
     value: nodeActive.value
-      ? [["-0.4", "-1.5", "-0.6", "-1.5", "-0.6"]]
-      : [Array(5).fill("")],
+      ? [
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "1", "0", "1", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
     dot: nodeActive.dot
       ? [
-        ["0", "0.5", "0", "0.5", "0"],
-        ["0.3", "1.9", "0.3", "1.9", "0.3"],
-        ["0", "0.5", "0", "0.5", "0"],
-        ["0.3", "1.9", "0.3", "1.9", "0.3"],
-        ["0", "0.5", "0", "0.5", "0"],
+        ["-800", "0", "-800", "0", "-800"],
+        ["-800", "0", "-800", "0", "-800"],
+        ["-800", "0", "-800", "0", "-800"],
+        ["-800", "0", "-800", "0", "-800"],
+        ["-800", "0", "-800", "0", "-800"]
       ]
       : makeMatrix(5, 5, ""),
-    argmax: nodeActive.argmax
-      ? [
-        ["1", "0", "0", "0", "0"],
-        ["0", "1", "0", "0", "0"],
-        ["0", "1", "0", "0", "0"],
-        ["0", "1", "0", "1", "0"],
-        ["0", "1", "0", "1", "0"],
-      ]
+    softmax: nodeActive.softmax
+      ? alternateMode
+        ? [
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "1", "0", "0", "0"],
+            ["0", "1", "0", "0", "0"],
+            ["0", {value: "0", highlight: true}, "0", {value: "0", highlight: true}, "0"]
+          ]
+        : [
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "1", "0", "0", "0"],
+            ["0", "1", "0", "0", "0"],
+            ["0", "0.5", "0", "0.5", "0"]
+          ]
       : makeMatrix(5, 5, ""),
-    leftmost: nodeActive.leftmost
-      ? [
-        ["1", "0", "0", "0", "0"],
-        ["0", "1", "0", "0", "0"],
-        ["0", "1", "0", "0", "0"],
-        ["0", "1", "0", "0", "0"],
-        ["0", "1", "0", "0", "0"],
-      ]
-      : makeMatrix(5, 5, ""),
+
     wsum: nodeActive.wsum
-      ? [["-0.4", "-1.5", "-1.5", "-1.5", "-1.5"]]
-      : [Array(5).fill("")],
-    proj: nodeActive.proj
-      ? [["0.02", "-0.5", "-0.5", "-0.5", "-0.5"]]
-      : [Array(5).fill("")],
+      ? alternateMode
+        ? [
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "1", "1", {value: "0", highlight: true}],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"]
+          ]
+        : [
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "1", "1", "1"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"]
+          ]
+      : makeMatrix(7, 5, ""),
+
     addnorm1: nodeActive.addnorm1
-      ? [["0.06", "-3.5", "-0.5", "-3.5", "-0.5"]]
-      : [Array(5).fill("")],
-    ff_linear1: nodeActive.ff_linear1
+      ? alternateMode
+        ? [
+          ["0", "1", "0", "1", "0"],
+          ["1", "0", "0", "0", "0"],
+          ["0", "0", "1", "0", "1"],
+          ["0", "0", "1", "1", { value: "0", highlight: true} ],
+          ["0", "0", "0", "0", "0"],
+          ["0", "0", "0", "0", "0"],
+          ["0", "0", "0", "0", "0"]
+        ]
+        : [
+            ["0", "1", "0", "1", "0"],
+            ["1", "0", "0", "0", "0"],
+            ["0", "0", "1", "0", "1"],
+            ["0", "0", "1", "1", "1"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"],
+            ["0", "0", "0", "0", "0"]
+          ]
+      : makeMatrix(7, 5, ""),
+    ff: nodeActive.ff
       ? [
-        ["0", "-0.8", "0", "-0.8", "0"],
-        ["0", "5.6", "1.4", "5.6", "1.4"],
-        ["-0.8", "-0.8", "0", "-0.8", "-0.8"],
-        ["0", "1.4", "0", "1.4", "0"],
-      ]
-      : makeMatrix(4, 5, ""),
-    ff_gelu: nodeActive.ff_gelu
-      ? [
-        ["0", "-0.2", "0", "-0.2", "0"],
-        ["0", "5.6", "0", "5.6", "0"],
-        ["-0.2", "-0.03", "-0.2", "-0.03", "-0.2"],
         ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "1", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"]
       ]
-      : makeMatrix(4, 5, ""),
-    ff_linear2: nodeActive.ff_linear2
-      ? [["0", "-3.1", "0", "-3.1", "0"]]
-      : [Array(5).fill("")],
+      : makeMatrix(7, 5, ""),
     addnorm2: nodeActive.addnorm2
-      ? [["0.06", "-6.6", "0", "-6.6", "0"]]
-      : [Array(5).fill("")],
+      ? [
+        ["0", "1", "0", "1", "0"],
+        ["1", "0", "0", "0", "0"],
+        ["0", "0", "1", "0", "1"],
+        ["0", "0", "1", "1", "0"],
+        ["0", "0", "0", "1", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
+    query2: nodeActive.query2
+      ? [
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["-800", "-800", "-800", "-800", "-800"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
+    key2: nodeActive.key2
+      ? [
+        ["-1", "0", "-1", "0", "-1"],
+        ["0", "-1", "-1", "-1", "-1"],
+        ["-1", "-1", "0", "-1", "0"],
+        ["-1", "-1", "0", "0", "-1"],
+        ["-1", "-1", "-1", "0", "-1"],
+        ["-1", "-1", "-1", "-1", "-1"],
+        ["-1", "-1", "-1", "-1", "-1"]
+      ]
+      : makeMatrix(7, 5, ""),
+    value2: nodeActive.value2
+      ? [
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "1", "0"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
+    dot2: nodeActive.dot2
+      ? [
+        ["-800", "-800", "-800", "0", "-800"],
+        ["-800", "-800", "-800", "0", "-800"],
+        ["-800", "-800", "-800", "0", "-800"],
+        ["-800", "-800", "-800", "0", "-800"],
+        ["-800", "-800", "-800", "0", "-800"]
+      ]
+      : makeMatrix(5, 5, ""),
+    softmax2: nodeActive.softmax2
+      ? [
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "1", "0"]
+      ]
+      : makeMatrix(5, 5, ""),
+    wsum2: nodeActive.wsum2
+      ? [
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "1"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
+    addnorm3: nodeActive.addnorm3
+      ? [
+        ["0", "1", "0", "1", "0"],
+        ["1", "0", "0", "0", "0"],
+        ["0", "0", "1", "0", "1"],
+        ["0", "0", "1", "1", "0"],
+        ["0", "0", "0", "1", "0"],
+        ["0", "0", "0", "0", "1"],
+        ["0", "0", "0", "0", "0"]
+      ]
+      : makeMatrix(7, 5, ""),
+    ff2: nodeActive.ff2
+      ? [
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "0", "0", "0"],
+        ["0", "0", "1", "1", "1"]
+      ]
+      : makeMatrix(7, 5, ""),
+    addnorm4: nodeActive.addnorm4
+      ? [
+        ["0", "1", "0", "1", "0"],
+        ["1", "0", "0", "0", "0"],
+        ["0", "0", "1", "0", "1"],
+        ["0", "0", "1", "1", "0"],
+        ["0", "0", "0", "1", "0"],
+        ["0", "0", "0", "0", "1"],
+        ["0", "0", "1", "1", "1"]
+      ]
+      : makeMatrix(7, 5, ""),
     linear: nodeActive.linear
-      ? [["-0.2", "10.8", "-0.09", "47.4", "-0.09"]]
-      : [Array(5).fill("")],
+      ? [["0", "0", "1", "1", "1"]]
+      : makeMatrix(1, 5, ""),
   }), [nodeActive, inputTokens]);
 
+  const nodeLogics: Record<NodeKey, React.ReactNode> = {
+    embedding: (
+      "Assign each unique token a distinct embedding by activating a corresponding dimension in a one-hot manner."
+    ),
+    query: (
+      "Assign a large positive value (e.g., 800) at the dimension of interest, and 0 elsewhere. This ensures that when combined in attention, only the relevant key stands out."
+    ),
+    key: (
+      <MathJax>
+        {`$$
+          \\mK=\\mE-1
+        $$`}
+      </MathJax>
+    ),
+    value: (
+      "Copy the target dimension (the 1st) into an unused one (the 4th) to carry its value forward. All other dimensions are zero."
+    ),
+    dot: (
+      <MathJax>
+        {`Dot product results in 0 at positions where $\\pi_a$ is satisfied, and -800 elsewhere.`}
+      </MathJax>
+    ),
+    softmax: (
+      <MathJax>
+        {alternateMode
+          ? "The last row becomes all zeros because two earlier positions satisfy $\\pi_a$, exceeding the limit of one nonzero entry and diluting the attention."
+          : "Acts effectively the same as average hard attention."
+        }
+      </MathJax>
+    ),
+    wsum: (
+      <MathJax>
+        {alternateMode
+          ? "This results in a flawed simulation of $\\past\\pi_a$, which is incorrect at the final position."
+          : "The new dimension now simulates $\\past\\pi_a$."
+        }
+      </MathJax>
+    ),
+    addnorm1: (
+      <div className="space-y-2">
+        {alternateMode ? (
+          <>
+            <MathJax>
+              {"The current simulation is flawed and needs correction."}
+            </MathJax>
+            {!showFullDiagram && (
+              <button
+                onClick={() => setShowFullDiagram(true)}
+                className="text-xs px-3 py-1 bg-white/70 text-gray-900 border border-gray-300 rounded hover:bg-white shadow-sm hover:shadow transition cursor-pointer"
+              >
+                Add an additional layer to fix the simulation →
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <MathJax>
+              {"Job done? Not quite. When too many positions satisfy $\\past \\pi_a$, attention weights vanish."}
+            </MathJax>
+              <button
+                onClick={() => {
+                  setAlternateMode(true);
+                  deactivateNodeAndDescendants("wsum");
+                }}
+                className="text-xs px-3 py-1 bg-white/70 text-gray-900 border border-gray-300 rounded hover:bg-white shadow-sm hover:shadow transition cursor-pointer"
+              >
+                Assume only one nonzero entry in softmax →
+              </button>
+          </>
+        )}
+      </div>
+    ),
+    ff: (
+      <MathJax>
+        {`As a preparatory step, we we compute the logical intersection of $\\pi_a$ from dimension 1 and the flawed $\\past\\pi_a$ from dimension 4, and store the result in a new dimension:
+        $$
+        \\mF_{5,:} = \\ReLU(\\mN_{1,:} + \\mN_{4,:})
+        $$
+        Only one position satisfies this condition at most.
+        `}
+      </MathJax>
+    ),
+    addnorm2: (
+      "Adds the feedforward output to the residual from the previous sublayer."
+    ),
+    query2: (
+      "Similar to the first attention, but now targeting the 5th dimension."
+    ),
+    key2: (
+      <MathJax>
+        {`$$
+          \\mK=\\mR-1
+        $$`}
+      </MathJax>
+    ),
+    value2: (
+      "Copy the target dimension (the 5th) into an unused one (the 6th) to carry its value forward. All other dimensions are zero."
+    ),
+    dot2: (
+      <MathJax>
+        {`The dot product yields 0 at positions where $\\mR_{5,:} = 1$, and -800 elsewhere. As noted, at most one such position exists.`}
+      </MathJax>
+    ),
+    softmax2: (
+      "Acts effectively the same as average hard attention. Attention weights never vanish here."
+    ),
+    wsum2: (
+      <MathJax>
+        {`
+          The new dimension now simulates $\\past(\\pi_a\\land \\past\\pi_a)$. It's different from $\\past\\pi_a$ at positions where there is only one a before it.
+        `}
+      </MathJax>
+    ),
+    addnorm3: (
+      <MathJax>
+        {`
+          Residual connection.
+        `}
+      </MathJax>
+    ),
+    ff2: (
+      <MathJax>
+        {`Compute the logical union of the correct $\\past(\\pi_a \\land \\past\\pi_a)$ (dim 6) and the flawed $\\past\\pi_a$ (dim 4), and store the result in the 7th dimension:
+        $$
+        \\mF_{7,:} = 1 - \\ReLU(1 - \\mN_{4,:} - \\mN_{6,:})
+        $$
+        This results in a correct simulation of $\\past\\pi_a$.
+        `}
+      </MathJax>
+    ),
+    addnorm4: (
+      "Adds the feedforward output to the residual from the previous sublayer."
+    ),
+    linear: (
+      <MathJax>
+        {`The linear layer just copies the last dimension.`}
+      </MathJax>
+    ),
+  };
   // --- MAIN RETURN ---
   return (
     <div className="w-full min-h-[80vh] bg-gray-50 flex flex-col items-center justify-start">
-    <div className="flex flex-col sm:flex-row w-fit max-w-full h-[80vh] overflow-hidden shadow">
+    <div className="flex flex-col sm:flex-row w-fit max-w-full shadow">
       {/* ---- DIAGRAM COLUMN ---- */}
-      <div className="flex-1 min-w-0 max-w-4xl overflow-y-auto px-1 xs:px-2 sm:px-4 md:px-8 py-3">
-        <h1 className="text-2xl xs:text-3xl font-bold text-center mb-6 xs:mb-10">
-          Example Transformer Decoder
-        </h1>
-
+      <div className="flex-1 min-w-0 max-w-4xl px-1 xs:px-2 sm:px-4 md:px-8 py-3">
         {/* Input tokens */}
         <TokenMatrix tokens={[inputTokens]} />
 
@@ -594,7 +720,9 @@ export default function TransformerDiagram2() {
                   <tr key={idx}>
                     <td className="text-right text-white text-xs xs:text-sm">{token}</td>
                     <td className="text-center text-white">→</td>
-                    <td className="text-left text-white text-xs xs:text-sm">{vocabulary[token]}</td>
+                    <td className="text-left text-white text-xs xs:text-sm">
+                      [{vocabulary[token].join(', ')}]
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -662,25 +790,15 @@ export default function TransformerDiagram2() {
                 />
                 <TokenMatrix tokens={outputs.dot as string[][]} />
               </div>
-              {/* Argmax */}
+              {/* Softmax */}
               <div className="flex flex-col items-center sm:col-span-2">
                 <SubLayerBox
-                  color={nodeDisplay.argmax.color}
-                  label={nodeDisplay.argmax.label}
-                  onPrev={() => deactivateNodeAndDescendants("argmax")}
-                  onNext={() => activateNodeAndAncestors("argmax")}
+                  color={nodeDisplay.softmax.color}
+                  label={nodeDisplay.softmax.label}
+                  onPrev={() => deactivateNodeAndDescendants("softmax")}
+                  onNext={() => activateNodeAndAncestors("softmax")}
                 />
-                <TokenMatrix tokens={outputs.argmax as string[][]} />
-              </div>
-              {/* Leftmost */}
-              <div className="flex flex-col items-center sm:col-span-2">
-                <SubLayerBox
-                  color={nodeDisplay.leftmost.color}
-                  label={nodeDisplay.leftmost.label}
-                  onPrev={() => deactivateNodeAndDescendants("leftmost")}
-                  onNext={() => activateNodeAndAncestors("leftmost")}
-                />
-                <TokenMatrix tokens={outputs.leftmost as string[][]} />
+                <TokenMatrix tokens={outputs.softmax as string[][]} />
               </div>
               {/* Weighted Sum */}
               <div className="flex flex-col items-center sm:col-span-3">
@@ -691,16 +809,6 @@ export default function TransformerDiagram2() {
                   onNext={() => activateNodeAndAncestors("wsum")}
                 />
                 <TokenMatrix tokens={outputs.wsum as string[][]} />
-              </div>
-              {/* Projection */}
-              <div className="flex flex-col items-center sm:col-span-3">
-                <SubLayerBox
-                  color={nodeDisplay.proj.color}
-                  label={nodeDisplay.proj.label}
-                  onPrev={() => deactivateNodeAndDescendants("proj")}
-                  onNext={() => activateNodeAndAncestors("proj")}
-                />
-                <TokenMatrix tokens={outputs.proj as string[][]} />
               </div>
             </div>
           </div>
@@ -714,41 +822,16 @@ export default function TransformerDiagram2() {
           />
           <TokenMatrix tokens={outputs.addnorm1 as string[][]} />
 
+          {showFullDiagram && (
+            <>
           {/* Feed Forward sublayers - vertical */}
-          <div className="border border-lime-700 bg-lime-50 rounded-2xl p-2 sm:p-6 w-full max-w-4xl mb-4 sm:mb-6 mt-2 sm:mt-4">
-            <h3 className="text-lg xs:text-xl font-semibold text-center mb-2 xs:mb-4 text-lime-800">
-              Feed Forward
-            </h3>
-            <div className="flex flex-col gap-2 sm:gap-4 w-full items-center">
-              <div className="flex flex-col items-center w-full">
-                <SubLayerBox
-                  color={nodeDisplay.ff_linear1.color}
-                  label={nodeDisplay.ff_linear1.label}
-                  onPrev={() => deactivateNodeAndDescendants("ff_linear1")}
-                  onNext={() => activateNodeAndAncestors("ff_linear1")}
-                />
-                <TokenMatrix tokens={outputs.ff_linear1 as string[][]} />
-              </div>
-              <div className="flex flex-col items-center w-full">
-                <SubLayerBox
-                  color={nodeDisplay.ff_gelu.color}
-                  label={nodeDisplay.ff_gelu.label}
-                  onPrev={() => deactivateNodeAndDescendants("ff_gelu")}
-                  onNext={() => activateNodeAndAncestors("ff_gelu")}
-                />
-                <TokenMatrix tokens={outputs.ff_gelu as string[][]} />
-              </div>
-              <div className="flex flex-col items-center w-full">
-                <SubLayerBox
-                  color={nodeDisplay.ff_linear2.color}
-                  label={nodeDisplay.ff_linear2.label}
-                  onPrev={() => deactivateNodeAndDescendants("ff_linear2")}
-                  onNext={() => activateNodeAndAncestors("ff_linear2")}
-                />
-                <TokenMatrix tokens={outputs.ff_linear2 as string[][]} />
-              </div>
-            </div>
-          </div>
+          <LayerBox
+            color={nodeDisplay.ff.color}
+            label={nodeDisplay.ff.label}
+            onPrev={() => deactivateNodeAndDescendants("ff")}
+            onNext={() => activateNodeAndAncestors("ff")}
+          />
+          <TokenMatrix tokens={outputs.ff as string[][]} />
 
           {/* Add & Norm 2 */}
           <LayerBox
@@ -758,6 +841,117 @@ export default function TransformerDiagram2() {
             onNext={() => activateNodeAndAncestors("addnorm2")}
           />
           <TokenMatrix tokens={outputs.addnorm2 as string[][]} />
+          </>
+          )}
+        </div>
+
+        {showFullDiagram && (
+          <>
+        <div className="border-4 border-blue-400 bg-blue-50 rounded-3xl p-3 sm:p-8 w-full max-w-4xl mx-auto mb-6 xs:mb-8">
+                <h2 className="text-xl xs:text-2xl font-bold text-center mb-5 xs:mb-7 text-blue-900 tracking-wide">
+                  Decoder Layer 2
+                </h2>
+        <div className="border border-amber-700 bg-amber-50 rounded-2xl p-2 sm:p-6 w-full max-w-4xl mb-4 sm:mb-6">
+            <h3 className="text-lg xs:text-xl font-semibold text-center mb-2 xs:mb-4 text-amber-800">
+              Masked Self-Attention
+            </h3>
+            {/* Responsive: stacks on small screens, side-by-side grid on >=sm */}
+            <div
+              className="
+                flex flex-col
+                sm:grid sm:grid-cols-3 sm:gap-x-2 sm:gap-y-4
+                mt-2 w-full items-stretch
+              "
+            >
+              {/* Query */}
+              <div className="flex flex-col items-center mb-2 sm:mb-0">
+                <SubLayerBox
+                  color={nodeDisplay.query2.color}
+                  label={nodeDisplay.query2.label}
+                  onPrev={() => deactivateNodeAndDescendants("query2")}
+                  onNext={() => activateNodeAndAncestors("query2")}
+                />
+                <TokenMatrix tokens={outputs.query2 as string[][]} />
+              </div>
+              {/* Key */}
+              <div className="flex flex-col items-center mb-2 sm:mb-0">
+                <SubLayerBox
+                  color={nodeDisplay.key2.color}
+                  label={nodeDisplay.key2.label}
+                  onPrev={() => deactivateNodeAndDescendants("key2")}
+                  onNext={() => activateNodeAndAncestors("key2")}
+                />
+                <TokenMatrix tokens={outputs.key2 as string[][]} />
+              </div>
+              {/* Value */}
+              <div className="flex flex-col items-center mb-2 sm:mb-0">
+                <SubLayerBox
+                  color={nodeDisplay.value2.color}
+                  label={nodeDisplay.value2.label}
+                  onPrev={() => deactivateNodeAndDescendants("value2")}
+                  onNext={() => activateNodeAndAncestors("value2")}
+                />
+                <TokenMatrix tokens={outputs.value2 as string[][]} />
+              </div>
+              {/* Dot */}
+              <div className="flex flex-col items-center sm:col-span-2">
+                <SubLayerBox
+                  color={nodeDisplay.dot2.color}
+                  label={nodeDisplay.dot2.label}
+                  onPrev={() => deactivateNodeAndDescendants("dot2")}
+                  onNext={() => activateNodeAndAncestors("dot2")}
+                />
+                <TokenMatrix tokens={outputs.dot2 as string[][]} />
+              </div>
+              {/* Softmax */}
+              <div className="flex flex-col items-center sm:col-span-2">
+                <SubLayerBox
+                  color={nodeDisplay.softmax2.color}
+                  label={nodeDisplay.softmax2.label}
+                  onPrev={() => deactivateNodeAndDescendants("softmax2")}
+                  onNext={() => activateNodeAndAncestors("softmax2")}
+                />
+                <TokenMatrix tokens={outputs.softmax2 as string[][]} />
+              </div>
+              {/* Weighted Sum */}
+              <div className="flex flex-col items-center sm:col-span-3">
+                <SubLayerBox
+                  color={nodeDisplay.wsum2.color}
+                  label={nodeDisplay.wsum2.label}
+                  onPrev={() => deactivateNodeAndDescendants("wsum2")}
+                  onNext={() => activateNodeAndAncestors("wsum2")}
+                />
+                <TokenMatrix tokens={outputs.wsum2 as string[][]} />
+              </div>
+            </div>
+          </div>
+
+          {/* Add & Norm 1 */}
+          <LayerBox
+            color={nodeDisplay.addnorm3.color}
+            label={nodeDisplay.addnorm3.label}
+            onPrev={() => deactivateNodeAndDescendants("addnorm3")}
+            onNext={() => activateNodeAndAncestors("addnorm3")}
+          />
+          <TokenMatrix tokens={outputs.addnorm3 as string[][]} />
+
+          {/* Feed Forward sublayers - vertical */}
+          <LayerBox
+            color={nodeDisplay.ff2.color}
+            label={nodeDisplay.ff2.label}
+            onPrev={() => deactivateNodeAndDescendants("ff2")}
+            onNext={() => activateNodeAndAncestors("ff2")}
+          />
+          <TokenMatrix tokens={outputs.ff2 as string[][]} />
+
+          {/* Add & Norm 2 */}
+          <LayerBox
+            color={nodeDisplay.addnorm4.color}
+            label={nodeDisplay.addnorm4.label}
+            onPrev={() => deactivateNodeAndDescendants("addnorm4")}
+            onNext={() => activateNodeAndAncestors("addnorm4")}
+          />
+          <TokenMatrix tokens={outputs.addnorm4 as string[][]} />
         </div>
 
         {/* Linear */}
@@ -768,6 +962,8 @@ export default function TransformerDiagram2() {
           onNext={() => activateNodeAndAncestors("linear")}
         />
         <TokenMatrix tokens={outputs.linear as string[][]} />
+        </>
+        )}
       </div>
 
       {/* --- LOGIC WALKTHROUGH SIDEBAR --- */}

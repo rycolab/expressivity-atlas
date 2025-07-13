@@ -48,11 +48,11 @@ const nodeDisplay: Record<NodeKey, { label: string; color: string }> = {
   leftmost: { label: "Leftmost", color: "bg-amber-600" },
   wsum: { label: "Weighted sum", color: "bg-amber-600" },
   proj: { label: "Projection", color: "bg-amber-600" },
-  addnorm1: { label: "Add & Norm", color: "bg-slate-600" },
+  addnorm1: { label: "Add", color: "bg-slate-600" },
   ff_linear1: { label: "Linear", color: "bg-lime-600" },
   ff_gelu: { label: "GELU", color: "bg-lime-600" },
   ff_linear2: { label: "Linear", color: "bg-lime-600" },
-  addnorm2: { label: "Add & Norm", color: "bg-slate-600" },
+  addnorm2: { label: "Add", color: "bg-slate-600" },
   linear: { label: "Linear", color: "bg-rose-600" },
 };
 
@@ -74,22 +74,23 @@ const TokenBox = ({ token }: { token: string }) => (
       border rounded-xl shadow-sm bg-white text-center
       flex items-center justify-center
       transition-all
-      w-7 h-7 text-[8px]
-      xs:w-8 xs:h-8 xs:text-[9px]
-      sm:w-10 sm:h-10 sm:text-[10px]
-      md:w-12 md:h-12 md:text-[11px]
-      lg:w-14 lg:h-14 lg:text-[12px]
-      max-w-[2.75rem] max-h-[2.75rem]
+      w-6 h-6 text-[7px]
+      xs:w-7 xs:h-7 xs:text-[8px]
+      sm:w-8 sm:h-8 sm:text-[9px]
+      md:w-9 md:h-9 md:text-[10px]
+      lg:w-10 lg:h-10 lg:text-[11px]
+      max-w-[2rem] max-h-[2rem]
       break-all
     `}
     style={{
-      minWidth: '1.75rem',
-      minHeight: '1.75rem',
+      minWidth: '1.5rem',
+      minHeight: '1.5rem',
     }}
   >
     {token}
   </div>
 );
+
 
 const TokenMatrix = ({ tokens }: { tokens: string[][] }) => (
   <div className="flex flex-col gap-[2px] my-2">
@@ -118,7 +119,8 @@ const LayerBox = ({
   children?: React.ReactNode;
 }) => (
   <div
-    className={`relative rounded-2xl shadow-md p-3 sm:p-4 text-center w-full max-w-4xl mx-auto ${color} bg-opacity-90`}
+    className={`relative rounded-2xl shadow-md px-3 sm:px-4 py-1 sm:py-1.5 w-full max-w-4xl mx-auto ${color} bg-opacity-90
+                flex flex-col items-center text-center`}
   >
     {onPrev && (
       <button
@@ -138,8 +140,15 @@ const LayerBox = ({
         ▼
       </button>
     )}
-    <div className="text-lg font-semibold text-white mb-2">{label}</div>
-    {children && <div>{children}</div>}
+
+    {/* Remove margin below */}
+    <div className="text-sm sm:text-base font-semibold text-white leading-tight">
+      {label}
+    </div>
+
+    {children && (
+      <div className="mt-0.5">{children}</div>
+    )}
   </div>
 );
 
@@ -177,8 +186,16 @@ const SubLayerBox = ({
         ▼
       </button>
     )}
-    <span className="text-xs font-semibold text-white mb-1">{label}</span>
-    {children}
+
+    <span className="text-xs font-semibold text-white leading-tight">
+      {label}
+    </span>
+
+    {children && (
+      <div className="mt-0.5">
+        {children}
+      </div>
+    )}
   </div>
 );
 
@@ -253,9 +270,8 @@ export default function TransformerDiagram({
         const containerHeight = container.clientHeight;
         const itemOffsetTop = activeEl.offsetTop;
         const itemHeight = activeEl.offsetHeight;
-        const offset = containerHeight * 0.4;
         container.scrollTo({
-          top: itemOffsetTop - containerHeight / 2 + itemHeight / 2 + offset,
+          top: itemOffsetTop - containerHeight / 2 + itemHeight / 2,
           behavior: "smooth",
         });
       }, 0);
@@ -285,9 +301,9 @@ export default function TransformerDiagram({
   // --- MAIN RETURN ---
   return (
     <div className="w-full min-h-[80vh] bg-gray-50 flex flex-col items-center justify-start">
-    <div className="flex flex-col sm:flex-row w-fit max-w-full h-[80vh] overflow-hidden shadow">
+    <div className="flex flex-col sm:flex-row w-fit max-w-full shadow">
       {/* ---- DIAGRAM COLUMN ---- */}
-      <div className="flex-1 min-w-0 max-w-4xl overflow-y-auto px-1 xs:px-2 sm:px-4 md:px-8 py-3">
+      <div className="flex-1 min-w-0 max-w-4xl px-1 xs:px-2 sm:px-4 md:px-8 py-3">
 
         {/* Input tokens */}
         <TokenMatrix tokens={[inputTokens]} />
