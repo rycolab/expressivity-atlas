@@ -10,7 +10,7 @@ export const graphData = {
     { id: 'FO[<]', group: 'logic' },
     { id: 'FO[<,MOD]', group: 'logic' },
     { id: 'FOC[<]', group: 'logic' },
-    { id: 'SOM[+]', group: 'logic' },
+    { id: 'SOM[+1]', group: 'logic' },
     { id: 'LTL', group: 'logic' },
     { id: 'aperiodic', group: 'monoid' },
     { id: 'DFA', group: 'automaton' },

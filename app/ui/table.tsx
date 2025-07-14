@@ -1,0 +1,211 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  ColumnDef,
+} from '@tanstack/react-table';
+
+type Row = {
+  attention: string;
+  precision: string;
+  layer: string;
+  width: string;
+  intermediateStep: string;
+  logic: string;
+  automata: string;
+  algebra: string;
+  circuitComplexity: string;
+};
+
+const rawData: Row[] = [
+  {
+    attention: 'Soft',
+    precision: 'Constant',
+    layer: 'Constant',
+    width: 'Constant',
+    intermediateStep: 'None',
+    logic: '=PFO²[<]',
+    automata: '',
+    algebra: '',
+    circuitComplexity: '',
+  },
+  {
+    attention: 'Average',
+    precision: 'Constant',
+    layer: 'Constant',
+    width: 'Constant',
+    intermediateStep: 'None',
+    logic: '=PFO²[<]',
+    automata: '',
+    algebra: '',
+    circuitComplexity: '',
+  },
+  {
+    attention: 'Leftmost',
+    precision: 'Constant',
+    layer: 'Constant',
+    width: 'Constant',
+    intermediateStep: 'None',
+    logic: '=PFO²[<]',
+    automata: '',
+    algebra: '',
+    circuitComplexity: '',
+  },
+  {
+    attention: 'Rightmost',
+    precision: 'Constant',
+    layer: 'Constant',
+    width: 'Constant',
+    intermediateStep: 'None',
+    logic: '=FO[<]',
+    automata: '',
+    algebra: '',
+    circuitComplexity: '',
+  },
+];
+
+const filterKeys = [
+  'attention',
+  'precision',
+  'layer',
+  'width',
+  'intermediateStep',
+] as const;
+
+type FilterKey = typeof filterKeys[number];
+
+function formatKeyLabel(key: string) {
+  // Capitalize first letter and insert spaces before camelCase capitals
+  return key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+}
+
+export default function ExpressivityTable() {
+  const [filters, setFilters] = useState<Record<FilterKey, string>>({
+    attention: '',
+    precision: '',
+    layer: '',
+    width: '',
+    intermediateStep: '',
+  });
+
+  const data = useMemo(() => {
+    return rawData.filter((row) =>
+      filterKeys.every((key) =>
+        filters[key] ? row[key] === filters[key] : true
+      )
+    );
+  }, [filters]);
+
+  const filterOptions = useMemo(() => {
+    const options: Record<FilterKey, string[]> = {
+      attention: [],
+      precision: [],
+      layer: [],
+      width: [],
+      intermediateStep: [],
+    };
+    filterKeys.forEach((key) => {
+      options[key] = Array.from(new Set(rawData.map((row) => row[key])));
+    });
+    return options;
+  }, []);
+
+  const columns: ColumnDef<Row>[] = useMemo(
+    () => [
+      {
+        header: 'Assumptions',
+        columns: [
+          { header: 'Attention', accessorKey: 'attention' },
+          { header: 'Precision', accessorKey: 'precision' },
+          { header: 'Layer', accessorKey: 'layer' },
+          { header: 'Width', accessorKey: 'width' },
+          { header: 'Intermediate Step', accessorKey: 'intermediateStep' },
+        ],
+      },
+      {
+        header: 'Formal Analysis',
+        columns: [
+          { header: 'Logic', accessorKey: 'logic' },
+          { header: 'Automata', accessorKey: 'automata' },
+          { header: 'Algebra', accessorKey: 'algebra' },
+          { header: 'Circuit Complexity', accessorKey: 'circuitComplexity' },
+        ],
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Filters */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        {filterKeys.map((key) => (
+          <select
+            key={key}
+            value={filters[key]}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                [key]: e.target.value,
+              }))
+            }
+            className="border rounded px-2 py-1 bg-white"
+          >
+            <option value="">All {formatKeyLabel(key)}</option>
+            {filterOptions[key].map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="overflow-auto">
+        <table className="min-w-full border border-gray-300 text-sm">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={`border px-3 py-2 bg-gray-100 text-left ${
+                      header.colSpan > 1 ? 'text-center font-semibold' : ''
+                    }`}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="border px-3 py-2">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

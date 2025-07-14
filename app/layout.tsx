@@ -1,5 +1,4 @@
 import '@/app/ui/global.css';
-import { inter } from '@/app/ui/fonts';
 import SideBar from '@/app/ui/sidebar';
 import { MathJaxContext } from 'better-react-mathjax';
 import mathJaxConfig from '@/mathjax-config';
@@ -11,7 +10,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+      <body className="font-inter antialiased">
         <div className="relative h-screen">
           {/* Sidebar is fixed, not in a flex row */}
           <SideBar />

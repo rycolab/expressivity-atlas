@@ -1,4 +1,5 @@
 import ClassGraph from '@/app/ui/graph';
+import ExpressivityTable from '@/app/ui/table';
 
 export default function Page() {
   return (
@@ -9,15 +10,20 @@ export default function Page() {
           The Expressivity Atlas
         </h1>
         <p className="text-lg text-gray-700 leading-relaxed text-center">
-          Welcome to the <strong className="font-semibold text-gray-900">Expressivity Atlas</strong> —
-          a curated resource offering a structured overview of the formal methods used to analyze the
-          expressive power of neural architectures in language modeling.
+          Welcome to the <strong className="font-semibold text-gray-900">Expressivity Atlas</strong> — a curated resource
+          offering a structured overview of the formal methods used to analyze the expressive power of neural architectures
+          in language modeling.
         </p>
       </section>
 
       {/* Graph */}
-      <section className="flex-grow px-6 pb-6">
+      <section className="px-6 pb-6 max-w-6xl mx-auto">
         <ClassGraph />
+      </section>
+
+      {/* Table */}
+      <section className="px-6 pb-6 max-w-6xl mx-auto">
+        <ExpressivityTable />
       </section>
     </main>
   );
