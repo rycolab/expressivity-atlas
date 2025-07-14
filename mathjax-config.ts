@@ -335,8 +335,15 @@ const mathJaxConfig = {
           since: '{\\mathrel{\\textbf{S}}}',
           until: '{\\mathrel{\\textbf{U}}}',
 
+          som: '{\\textbf{SOM}[+1]}',
+          fo: '{\\textbf{FO}[<]}',
           pfo: '{\\textbf{PFO}^2[<]}',
-          ptl: '{\\textbf{LTL}[\\past]}'
+          ptl: '{\\textbf{LTL}[\\past]}',
+
+          ac: '{\\text{AC}^0}',
+          acc: '{\\text{ACC}^0}',
+          tc: '{\\text{TC}^0}',
+          nc: '{\\text{NC}^1}',
       },
       inlineMath: [['$', '$'], ['\\(', '\\)']],
       displayMath: [['$$', '$$'], ['\\[', '\\]']],

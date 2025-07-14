@@ -7,70 +7,105 @@ import {
   flexRender,
   ColumnDef,
 } from '@tanstack/react-table';
+import { MathJax } from 'better-react-mathjax';
+import { ReactNode } from 'react';
 
 type Row = {
   attention: string;
   precision: string;
-  layer: string;
+  depth: string;
   width: string;
   intermediateStep: string;
-  logic: string;
-  automata: string;
-  algebra: string;
-  circuitComplexity: string;
+  logic: ReactNode;
+  automata: ReactNode;
+  algebra: ReactNode;
+  circuitComplexity: ReactNode;
 };
 
 const rawData: Row[] = [
   {
     attention: 'Soft',
     precision: 'Constant',
-    layer: 'Constant',
+    depth: 'Constant',
     width: 'Constant',
     intermediateStep: 'None',
-    logic: '=PFO²[<]',
-    automata: '',
-    algebra: '',
-    circuitComplexity: '',
+    logic: <MathJax inline>{"$=\\pfo$"}</MathJax>,
+    automata: <MathJax inline>{"$=$ partially ordered DFA"}</MathJax>,
+    algebra: <MathJax inline>{"$\\mathcal{R}$-trivial"}</MathJax>,
+    circuitComplexity: <MathJax inline>{"$\\subseteq \\ac$"}</MathJax>,
   },
   {
     attention: 'Average',
     precision: 'Constant',
-    layer: 'Constant',
+    depth: 'Constant',
     width: 'Constant',
     intermediateStep: 'None',
-    logic: '=PFO²[<]',
-    automata: '',
-    algebra: '',
-    circuitComplexity: '',
+    logic: <MathJax inline>{"$=\\pfo$"}</MathJax>,
+    automata: <MathJax inline>{"$=$ partially ordered DFA"}</MathJax>,
+    algebra: <MathJax inline>{"$\\mathcal{R}$-trivial"}</MathJax>,
+    circuitComplexity: <MathJax inline>{"$\\subseteq \\ac$"}</MathJax>,
   },
   {
     attention: 'Leftmost',
     precision: 'Constant',
-    layer: 'Constant',
+    depth: 'Constant',
     width: 'Constant',
     intermediateStep: 'None',
-    logic: '=PFO²[<]',
-    automata: '',
-    algebra: '',
-    circuitComplexity: '',
+    logic: <MathJax inline>{"$=\\pfo$"}</MathJax>,
+    automata: <MathJax inline>{"$=$ partially ordered DFA"}</MathJax>,
+    algebra: <MathJax inline>{"$=\\mathcal{R}$-trivial"}</MathJax>,
+    circuitComplexity: <MathJax inline>{"$\\subseteq \\ac$"}</MathJax>,
   },
   {
     attention: 'Rightmost',
     precision: 'Constant',
-    layer: 'Constant',
+    depth: 'Constant',
     width: 'Constant',
     intermediateStep: 'None',
-    logic: '=FO[<]',
-    automata: '',
-    algebra: '',
-    circuitComplexity: '',
+    logic: <MathJax inline>{"$=\\fo$"}</MathJax>,
+    automata: <MathJax inline>{"$=$ counter-free DFA"}</MathJax>,
+    algebra: <MathJax inline>{"$=$ aperiodic"}</MathJax>,
+    circuitComplexity: <MathJax inline>{"$\\subseteq \\ac$"}</MathJax>,
   },
+  {
+    attention: 'Soft',
+    precision: 'Logarithmic',
+    depth: 'Constant',
+    width: 'Linear',
+    intermediateStep: 'None',
+    logic: <MathJax inline>{"$\\supseteq (\\textbf{FO+MOD})[<]$"}</MathJax>,
+    automata: <MathJax inline>{"$\\supseteq$ solvable"}</MathJax>,
+    algebra: <MathJax inline>{"$\\supseteq$ solvable"}</MathJax>,
+    circuitComplexity: <MathJax inline>{"$\\supseteq \\text{DLOGTIME-uniform} \\acc$"}</MathJax>,
+},
+{
+attention: 'Soft',
+precision: 'Logarithmic',
+depth: 'Logarithmic',
+width: 'Constant',
+intermediateStep: 'None',
+logic: <MathJax inline>{"$\\supseteq \\som$"}</MathJax>,
+automata: <MathJax inline>{"$\\supseteq$ DFA"}</MathJax>,
+algebra: <MathJax inline>{"$\\supseteq$ Finite"}</MathJax>,
+circuitComplexity: <MathJax inline>{"$\\supseteq \\tc, \\subseteq\\nc$"}</MathJax>,
+},
+{
+attention: 'Soft',
+precision: 'Logarithmic',
+depth: 'Constant',
+width: 'Constant',
+intermediateStep: 'None',
+logic: <MathJax inline>{"$\\supseteq \\fo$"}</MathJax>,
+automata: <MathJax inline>{"$\\supseteq$ counter-free DFA"}</MathJax>,
+algebra: <MathJax inline>{"$\\supseteq$ aperiodic"}</MathJax>,
+circuitComplexity: <MathJax inline>{"$\\supseteq \\ac$"}</MathJax> ,
+}
 ];
 
 const filterKeys = [
   'attention',
   'precision',
-  'layer',
+  'depth',
   'width',
   'intermediateStep',
 ] as const;
@@ -86,7 +121,7 @@ export default function ExpressivityTable() {
   const [filters, setFilters] = useState<Record<FilterKey, string>>({
     attention: '',
     precision: '',
-    layer: '',
+    depth: '',
     width: '',
     intermediateStep: '',
   });
@@ -103,7 +138,7 @@ export default function ExpressivityTable() {
     const options: Record<FilterKey, string[]> = {
       attention: [],
       precision: [],
-      layer: [],
+      depth: [],
       width: [],
       intermediateStep: [],
     };
@@ -120,7 +155,7 @@ export default function ExpressivityTable() {
         columns: [
           { header: 'Attention', accessorKey: 'attention' },
           { header: 'Precision', accessorKey: 'precision' },
-          { header: 'Layer', accessorKey: 'layer' },
+          { header: 'Depth', accessorKey: 'depth' },
           { header: 'Width', accessorKey: 'width' },
           { header: 'Intermediate Step', accessorKey: 'intermediateStep' },
         ],
@@ -128,10 +163,10 @@ export default function ExpressivityTable() {
       {
         header: 'Formal Analysis',
         columns: [
-          { header: 'Logic', accessorKey: 'logic' },
-          { header: 'Automata', accessorKey: 'automata' },
-          { header: 'Algebra', accessorKey: 'algebra' },
-          { header: 'Circuit Complexity', accessorKey: 'circuitComplexity' },
+          { header: 'Logic', accessorKey: 'logic', cell: ({ getValue }) => getValue(), },
+          { header: 'Automata', accessorKey: 'automata', cell: ({ getValue }) => getValue(), },
+          { header: 'Algebra', accessorKey: 'algebra', cell: ({ getValue }) => getValue(), },
+          { header: 'Circuit Complexity', accessorKey: 'circuitComplexity', cell: ({ getValue }) => getValue(), },
         ],
       },
     ],
