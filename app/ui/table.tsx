@@ -67,6 +67,17 @@ const rawData: Row[] = [
     algebra: <MathJax inline>{"$=$ aperiodic"}</MathJax>,
     circuitComplexity: <MathJax inline>{"$\\subseteq \\ac$"}</MathJax>,
   },
+{
+attention: 'Soft',
+precision: 'Logarithmic',
+depth: 'Constant',
+width: 'Constant',
+intermediateStep: 'None',
+logic: <MathJax inline>{"$\\supseteq \\fo$"}</MathJax>,
+automata: <MathJax inline>{"$\\supseteq$ counter-free DFA"}</MathJax>,
+algebra: <MathJax inline>{"$\\supseteq$ aperiodic"}</MathJax>,
+circuitComplexity: <MathJax inline>{"$\\supseteq \\ac$"}</MathJax> ,
+},
   {
     attention: 'Soft',
     precision: 'Logarithmic',
@@ -76,7 +87,7 @@ const rawData: Row[] = [
     logic: <MathJax inline>{"$\\supseteq (\\textbf{FO+MOD})[<]$"}</MathJax>,
     automata: <MathJax inline>{"$\\supseteq$ solvable"}</MathJax>,
     algebra: <MathJax inline>{"$\\supseteq$ solvable"}</MathJax>,
-    circuitComplexity: <MathJax inline>{"$\\supseteq \\text{DLOGTIME-uniform} \\acc$"}</MathJax>,
+    circuitComplexity: <MathJax inline>{"$\\supseteq \\text{DLOGTIME-uniform } \\acc$"}</MathJax>,
 },
 {
 attention: 'Soft',
@@ -89,17 +100,7 @@ automata: <MathJax inline>{"$\\supseteq$ DFA"}</MathJax>,
 algebra: <MathJax inline>{"$\\supseteq$ Finite"}</MathJax>,
 circuitComplexity: <MathJax inline>{"$\\supseteq \\tc, \\subseteq\\nc$"}</MathJax>,
 },
-{
-attention: 'Soft',
-precision: 'Logarithmic',
-depth: 'Constant',
-width: 'Constant',
-intermediateStep: 'None',
-logic: <MathJax inline>{"$\\supseteq \\fo$"}</MathJax>,
-automata: <MathJax inline>{"$\\supseteq$ counter-free DFA"}</MathJax>,
-algebra: <MathJax inline>{"$\\supseteq$ aperiodic"}</MathJax>,
-circuitComplexity: <MathJax inline>{"$\\supseteq \\ac$"}</MathJax> ,
-}
+
 ];
 
 const filterKeys = [
