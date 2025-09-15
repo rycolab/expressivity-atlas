@@ -1,27 +1,44 @@
-name: Deploy static Next.js to GH Pages (official)
+name: Deploy static Next.js to GitHub Pages
 on:
   push:
     branches: [ main ]
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Install pnpm first so it's on PATH
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      # Then set up Node and enable pnpm cache
       - uses: actions/setup-node@v4
-        with: { node-version: 18, cache: "pnpm" }
-      - run: corepack enable
-      - run: corepack prepare pnpm@9 --activate
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - run: pnpm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm build && pnpm export
+
+      # Upload the static site
       - uses: actions/upload-pages-artifact@v3
-        with: { path: ./out }
+        with:
+          path: ./out
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
