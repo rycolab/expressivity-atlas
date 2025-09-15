@@ -18,23 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Install pnpm first so it's on PATH
       - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
 
-      # Then set up Node and enable pnpm cache
       - uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: pnpm
 
-      - run: pnpm --version
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build && pnpm export
+      - run: pnpm build              # <- this creates ./out because of output:'export'
 
-      # Upload the static site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
