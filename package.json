@@ -5,7 +5,8 @@
     "dev": "next dev --turbopack",
     "start": "next start",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d out"
+    "deploy": "gh-pages -d out",
+    "export": "next export"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -25,6 +26,7 @@
     "react": "latest",
     "react-dom": "latest",
     "react-force-graph-2d": "^1.27.1",
+    "react-table": "^7.8.0",
     "tailwindcss": "3.4.17",
     "typescript": "5.7.3",
     "use-debounce": "^10.0.4",
