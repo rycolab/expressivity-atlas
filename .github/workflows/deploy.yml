@@ -1,15 +1,22 @@
 # .github/workflows/deploy.yml
 name: Deploy static Next.js to GH Pages
-on: { push: { branches: [ main ] } }
-permissions: { contents: write }
+on:
+  push:
+    branches: [ main ]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '18', cache: 'pnpm' }
+        with:
+          node-version: 18
+          cache: 'pnpm'
       - run: corepack enable
+      - run: corepack prepare pnpm@9 --activate   # ensures pnpm is available
+      - run: pnpm --version                       # (optional) sanity check
       - run: pnpm install --frozen-lockfile
       - run: pnpm build && pnpm export
       - uses: peaceiris/actions-gh-pages@v3
